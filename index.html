@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7K Life</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #0f0f0f;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-align: center;
+      text-shadow: 0 0 5px #7f00ff;
+    }
+    .section {
+      background: #1c1c1c;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 8px rgba(127, 0, 255, 0.4);
+    }
+    .section h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #bb86fc;
+    }
+    .todo input[type="text"] {
+      width: 80%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+    }
+    .todo button {
+      padding: 8px 12px;
+      margin-left: 8px;
+      background: #bb86fc;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .todo ul {
+      margin-top: 10px;
+    }
+    .todo ul li {
+      margin: 5px 0;
+      list-style: none;
+    }
+    .tracker span {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #333;
+      border-radius: 20px;
+      margin: 4px;
+      font-size: 14px;
+      box-shadow: 0 0 4px #7f00ff;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      border-radius: 8px;
+      border: none;
+      padding: 10px;
+      background: #121212;
+      color: #fff;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>7K Life Dashboard</h1>  <div class="section tracker">
+    <h2>Glow-Up Tracker</h2>
+    <span>Fap Streak: 3 days</span>
+    <span>Workout: Done</span>
+    <span>Sleep: 7h</span>
+  </div>  <div class="section todo">
+    <h2>To-Do List</h2>
+    <input type="text" id="todoInput" placeholder="Add a task...">
+    <button onclick="addTodo()">Add</button>
+    <ul id="todoList"></ul>
+  </div>  <div class="section journal">
+    <h2>Journal</h2>
+    <textarea placeholder="Write your thoughts..."></textarea>
+  </div>  <script>
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const task = input.value.trim();
+      if (task !== '') {
+        const li = document.createElement('li');
+        li.textContent = task;
+        document.getElementById('todoList').appendChild(li);
+        input.value = '';
+      }
+    }
+  </script></body>
+</html>
