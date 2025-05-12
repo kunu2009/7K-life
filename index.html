@@ -33,36 +33,50 @@
       margin-bottom: 10px;
       color: #bb86fc;
     }
-    .todo input[type="text"] {
-      width: 80%;
-      padding: 8px;
+    .habit-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .habit-item {
+      background: #333;
+      padding: 10px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+    }
+    .habit-item input {
+      margin-right: 10px;
+    }
+    .add-habit input {
+      padding: 6px;
       border: none;
       border-radius: 6px;
+      width: 70%;
     }
-    .todo button {
-      padding: 8px 12px;
-      margin-left: 8px;
+    .add-habit button {
+      padding: 6px 10px;
       background: #bb86fc;
-      color: #000;
       border: none;
+      color: #000;
       border-radius: 6px;
       cursor: pointer;
+      margin-left: 10px;
     }
-    .todo ul {
-      margin-top: 10px;
+    .todo-project {
+      margin-bottom: 10px;
     }
-    .todo ul li {
+    .todo-project h3 {
+      cursor: pointer;
       margin: 5px 0;
-      list-style: none;
     }
-    .tracker span {
-      display: inline-block;
-      padding: 6px 12px;
-      background: #333;
-      border-radius: 20px;
-      margin: 4px;
-      font-size: 14px;
-      box-shadow: 0 0 4px #7f00ff;
+    .task-list {
+      margin-left: 20px;
+      margin-top: 5px;
+    }
+    .task-list li {
+      list-style: none;
+      margin: 4px 0;
     }
     textarea {
       width: 100%;
@@ -77,29 +91,119 @@
   </style>
 </head>
 <body>
-  <h1>7K Life Dashboard</h1>  <div class="section tracker">
+  <h1>7K Life Dashboard</h1>  <div class="section" id="glowup">
     <h2>Glow-Up Tracker</h2>
-    <span>Fap Streak: 3 days</span>
-    <span>Workout: Done</span>
-    <span>Sleep: 7h</span>
-  </div>  <div class="section todo">
+    <div class="habit-list" id="habitList"></div>
+    <div class="add-habit">
+      <input type="text" id="newHabit" placeholder="New habit (e.g., Read)">
+      <button onclick="addHabit()">Add</button>
+    </div>
+  </div>  <div class="section" id="todos">
     <h2>To-Do List</h2>
-    <input type="text" id="todoInput" placeholder="Add a task...">
-    <button onclick="addTodo()">Add</button>
-    <ul id="todoList"></ul>
+    <div class="add-habit">
+      <input type="text" id="newProject" placeholder="New folder/project">
+      <button onclick="addProject()">Add</button>
+    </div>
+    <div id="projectList"></div>
   </div>  <div class="section journal">
     <h2>Journal</h2>
-    <textarea placeholder="Write your thoughts..."></textarea>
+    <textarea placeholder="Write your thoughts..." id="journal"></textarea>
   </div>  <script>
-    function addTodo() {
-      const input = document.getElementById('todoInput');
-      const task = input.value.trim();
-      if (task !== '') {
-        const li = document.createElement('li');
-        li.textContent = task;
-        document.getElementById('todoList').appendChild(li);
-        input.value = '';
+    const habitList = JSON.parse(localStorage.getItem('habits') || '[]');
+    const projects = JSON.parse(localStorage.getItem('projects') || '[]');
+
+    function renderHabits() {
+      const container = document.getElementById('habitList');
+      container.innerHTML = '';
+      habitList.forEach((habit, index) => {
+        const div = document.createElement('div');
+        div.className = 'habit-item';
+        div.innerHTML = `<input type="checkbox" ${habit.done ? 'checked' : ''} onchange="toggleHabit(${index})">${habit.name}`;
+        container.appendChild(div);
+      });
+      localStorage.setItem('habits', JSON.stringify(habitList));
+    }
+
+    function toggleHabit(i) {
+      habitList[i].done = !habitList[i].done;
+      renderHabits();
+    }
+
+    function addHabit() {
+      const val = document.getElementById('newHabit').value.trim();
+      if (val) {
+        habitList.push({ name: val, done: false });
+        document.getElementById('newHabit').value = '';
+        renderHabits();
       }
     }
+
+    function renderProjects() {
+      const container = document.getElementById('projectList');
+      container.innerHTML = '';
+      projects.forEach((project, pIndex) => {
+        const div = document.createElement('div');
+        div.className = 'todo-project';
+        div.innerHTML = `
+          <h3 onclick="toggleTasks(${pIndex})">${project.name}</h3>
+          <ul class="task-list" id="taskList-${pIndex}" style="display:none;"></ul>
+          <div class="add-habit">
+            <input type="text" id="taskInput-${pIndex}" placeholder="New task">
+            <button onclick="addTask(${pIndex})">Add</button>
+          </div>`;
+        container.appendChild(div);
+      });
+      saveProjects();
+    }
+
+    function toggleTasks(index) {
+      const el = document.getElementById(`taskList-${index}`);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      renderTasks(index);
+    }
+
+    function renderTasks(index) {
+      const ul = document.getElementById(`taskList-${index}`);
+      ul.innerHTML = '';
+      projects[index].tasks.forEach((task, tIndex) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${index}, ${tIndex})"> ${task.name}`;
+        ul.appendChild(li);
+      });
+    }
+
+    function addProject() {
+      const val = document.getElementById('newProject').value.trim();
+      if (val) {
+        projects.push({ name: val, tasks: [] });
+        document.getElementById('newProject').value = '';
+        renderProjects();
+      }
+    }
+
+    function addTask(pIndex) {
+      const input = document.getElementById(`taskInput-${pIndex}`);
+      const val = input.value.trim();
+      if (val) {
+        projects[pIndex].tasks.push({ name: val, done: false });
+        input.value = '';
+        renderTasks(pIndex);
+        saveProjects();
+      }
+    }
+
+    function toggleTask(pIndex, tIndex) {
+      projects[pIndex].tasks[tIndex].done = !projects[pIndex].tasks[tIndex].done;
+      renderTasks(pIndex);
+      saveProjects();
+    }
+
+    function saveProjects() {
+      localStorage.setItem('projects', JSON.stringify(projects));
+    }
+
+    // Initialize
+    renderHabits();
+    renderProjects();
   </script></body>
-</html>
+  </html>
