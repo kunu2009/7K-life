@@ -28,32 +28,14 @@
       border-radius: 12px;
       margin-bottom: 20px;
       box-shadow: 0 0 8px rgba(127, 0, 255, 0.4);
-      position: relative;
     }
     .section h2 {
       font-size: 20px;
       margin-bottom: 10px;
       color: #bb86fc;
     }
-    .fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #bb86fc;
-      color: #000;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 0 10px #7f00ff;
-      z-index: 1000;
-    }
     .todo input[type="text"] {
-      width: 80%;
+      width: 70%;
       padding: 8px;
       border: none;
       border-radius: 6px;
@@ -67,21 +49,18 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .todo ul {
-      margin-top: 10px;
-    }
     .todo ul li {
       margin: 5px 0;
       list-style: none;
     }
-    .tracker .habit {
-      display: flex;
-      justify-content: space-between;
-      margin: 5px 0;
-    }
-    .tracker .habit input {
-      width: 50px;
-      text-align: center;
+    .tracker span {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #333;
+      border-radius: 20px;
+      margin: 4px;
+      font-size: 14px;
+      box-shadow: 0 0 4px #7f00ff;
     }
     textarea {
       width: 100%;
@@ -93,133 +72,141 @@
       color: #fff;
       margin-top: 10px;
     }
-    #notesPanel, #historyPanel {
-      position: absolute;
+    .swipe-panel, .history-panel {
+      position: fixed;
       top: 0;
-      left: 100%;
       width: 100%;
-      height: 100vh;
-      background: #121212;
+      height: 100%;
+      background: #1c1c1c;
       padding: 20px;
-      transition: left 0.3s ease;
       overflow-y: auto;
-      z-index: 999;
+      display: none;
+      z-index: 1000;
     }
-    .visible {
-      left: 0 !important;
+    .ai-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #bb86fc;
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #bb86fc;
     }
   </style>
 </head>
 <body>
-  <h1>7K Life Dashboard</h1>
-  <div class="section tracker">
+  <h1>7K Life Dashboard</h1>  <div class="section tracker">
     <h2>Glow-Up Tracker</h2>
-    <div id="habits"></div>
-  </div>
-  <div class="section todo">
+    <span>Fap Streak: <b id="fap">0</b> days</span>
+    <span>Workout: <b id="workout">No</b></span>
+    <span>Sleep: <b id="sleep">0h</b></span>
+  </div>  <div class="section todo">
     <h2>To-Do List</h2>
     <input type="text" id="todoInput" placeholder="Add a task...">
     <button onclick="addTodo()">Add</button>
     <ul id="todoList"></ul>
-  </div>
-  <div class="section journal">
+  </div>  <div class="section journal">
     <h2>Journal</h2>
     <textarea id="journalInput" placeholder="Write your thoughts..."></textarea>
-  </div>  <div id="notesPanel">
+    <button onclick="saveJournal()">Save</button>
+  </div><button class="ai-btn" onclick="askAI()">?</button>
+
+  <!-- Notes Panel (Swipe Right) -->  <div class="swipe-panel" id="notesPanel">
     <h2>Advanced Notes</h2>
-    <textarea placeholder="Markdown style notes..."></textarea>
-    <button onclick="togglePanel('notesPanel')">Close</button>
-  </div>  <div id="historyPanel">
-    <h2>Journal History</h2>
-    <div id="journalHistory"></div>
-    <button onclick="togglePanel('historyPanel')">Close</button>
-  </div>  <div class="fab" onclick="openAddMenu()">+</div>  <script>
-    const habits = JSON.parse(localStorage.getItem('habits')) || ["Fap Streak", "Workout", "Sleep"];
-    const habitData = JSON.parse(localStorage.getItem('habitData')) || {};
+    <textarea id="notesArea" style="height:400px"></textarea>
+    <button onclick="closePanel('notesPanel')">Close</button>
+  </div>  <!-- History Panel (Swipe Left) -->  <div class="history-panel" id="historyPanel">
+    <h2>History</h2>
+    <div id="historyContent"></div>
+    <button onclick="closePanel('historyPanel')">Close</button>
+  </div>  <script>
+    const todos = JSON.parse(localStorage.getItem('todos')) || [];
+    const journals = JSON.parse(localStorage.getItem('journals')) || [];
+    const habits = JSON.parse(localStorage.getItem('habits')) || { fap: 0, workout: false, sleep: 0 };
 
-    function renderHabits() {
-      const container = document.getElementById('habits');
-      container.innerHTML = '';
-      habits.forEach(habit => {
-        const div = document.createElement('div');
-        div.className = 'habit';
-        div.innerHTML = `<span>${habit}:</span><input type='text' value='${habitData[habit] || ''}' oninput='saveHabit("${habit}", this.value)'>`;
-        container.appendChild(div);
+    function updateUI() {
+      document.getElementById('todoList').innerHTML = '';
+      todos.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.textContent = t;
+        document.getElementById('todoList').appendChild(li);
       });
-    }
-
-    function saveHabit(habit, value) {
-      habitData[habit] = value;
-      localStorage.setItem('habitData', JSON.stringify(habitData));
+      document.getElementById('fap').textContent = habits.fap;
+      document.getElementById('workout').textContent = habits.workout ? 'Yes' : 'No';
+      document.getElementById('sleep').textContent = habits.sleep;
     }
 
     function addTodo() {
       const input = document.getElementById('todoInput');
       const task = input.value.trim();
       if (task !== '') {
-        const list = JSON.parse(localStorage.getItem('todoList')) || [];
-        list.push(task);
-        localStorage.setItem('todoList', JSON.stringify(list));
-        renderTodoList();
+        todos.push(task);
+        localStorage.setItem('todos', JSON.stringify(todos));
+        updateUI();
         input.value = '';
       }
     }
 
-    function renderTodoList() {
-      const ul = document.getElementById('todoList');
-      ul.innerHTML = '';
-      const list = JSON.parse(localStorage.getItem('todoList')) || [];
-      list.forEach(task => {
-        const li = document.createElement('li');
-        li.textContent = task;
-        ul.appendChild(li);
-      });
-    }
-
     function saveJournal() {
-      const entry = document.getElementById('journalInput').value;
-      const today = new Date().toISOString().split('T')[0];
-      let history = JSON.parse(localStorage.getItem('journalHistory')) || {};
-      history[today] = entry;
-      localStorage.setItem('journalHistory', JSON.stringify(history));
-    }
-
-    function renderJournalHistory() {
-      const container = document.getElementById('journalHistory');
-      const history = JSON.parse(localStorage.getItem('journalHistory')) || {};
-      container.innerHTML = '';
-      for (let date in history) {
-        const p = document.createElement('p');
-        p.innerHTML = `<strong>${date}:</strong> ${history[date]}`;
-        container.appendChild(p);
+      const text = document.getElementById('journalInput').value.trim();
+      if (text !== '') {
+        const entry = { date: new Date().toLocaleDateString(), text };
+        journals.push(entry);
+        localStorage.setItem('journals', JSON.stringify(journals));
+        alert('Saved.');
+        document.getElementById('journalInput').value = '';
       }
     }
 
-    function openAddMenu() {
-      const habit = prompt("Add new habit name:");
-      if (habit) {
-        habits.push(habit);
-        localStorage.setItem('habits', JSON.stringify(habits));
-        renderHabits();
-      }
+    function askAI() {
+      const prompt = prompt("Ask something:");
+      if (!prompt) return;
+      fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer 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"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: prompt }]
+        })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.choices[0].message.content))
+      .catch(err => alert("Error: " + err.message));
     }
 
-    function togglePanel(id) {
-      document.getElementById(id).classList.toggle('visible');
+    function closePanel(id) {
+      document.getElementById(id).style.display = 'none';
     }
 
-    let startX = 0;
-    document.body.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    // Swipe detection
+    let touchstartX = 0;
+    document.body.addEventListener('touchstart', e => {
+      touchstartX = e.changedTouches[0].screenX;
+    });
     document.body.addEventListener('touchend', e => {
-      const deltaX = e.changedTouches[0].clientX - startX;
-      if (deltaX > 100) togglePanel('notesPanel');
-      else if (deltaX < -100) togglePanel('historyPanel');
+      const endX = e.changedTouches[0].screenX;
+      const diff = endX - touchstartX;
+      if (diff > 100) document.getElementById('notesPanel').style.display = 'block';
+      else if (diff < -100) showHistory();
     });
 
-    window.onload = () => {
-      renderHabits();
-      renderTodoList();
-      setInterval(saveJournal, 5000);
-    };
+    function showHistory() {
+      let content = '';
+      journals.forEach(j => {
+        content += `<p><b>${j.date}:</b><br>${j.text}</p><hr>`;
+      });
+      document.getElementById('historyContent').innerHTML = content;
+      document.getElementById('historyPanel').style.display = 'block';
+    }
+
+    updateUI();
   </script></body>
 </html>
