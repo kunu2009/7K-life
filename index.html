@@ -14,6 +14,7 @@
       background-color: #0f0f0f;
       color: #fff;
       padding: 20px;
+      overflow-x: hidden;
     }
     h1 {
       font-size: 32px;
@@ -27,56 +28,60 @@
       border-radius: 12px;
       margin-bottom: 20px;
       box-shadow: 0 0 8px rgba(127, 0, 255, 0.4);
+      position: relative;
     }
     .section h2 {
       font-size: 20px;
       margin-bottom: 10px;
       color: #bb86fc;
     }
-    .habit-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .habit-item {
-      background: #333;
-      padding: 10px 12px;
-      border-radius: 20px;
+    .fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #bb86fc;
+      color: #000;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 10px #7f00ff;
+      z-index: 1000;
     }
-    .habit-item input {
-      margin-right: 10px;
-    }
-    .add-habit input {
-      padding: 6px;
+    .todo input[type="text"] {
+      width: 80%;
+      padding: 8px;
       border: none;
       border-radius: 6px;
-      width: 70%;
     }
-    .add-habit button {
-      padding: 6px 10px;
+    .todo button {
+      padding: 8px 12px;
+      margin-left: 8px;
       background: #bb86fc;
-      border: none;
       color: #000;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin-left: 10px;
     }
-    .todo-project {
-      margin-bottom: 10px;
+    .todo ul {
+      margin-top: 10px;
     }
-    .todo-project h3 {
-      cursor: pointer;
+    .todo ul li {
+      margin: 5px 0;
+      list-style: none;
+    }
+    .tracker .habit {
+      display: flex;
+      justify-content: space-between;
       margin: 5px 0;
     }
-    .task-list {
-      margin-left: 20px;
-      margin-top: 5px;
-    }
-    .task-list li {
-      list-style: none;
-      margin: 4px 0;
+    .tracker .habit input {
+      width: 50px;
+      text-align: center;
     }
     textarea {
       width: 100%;
@@ -88,122 +93,133 @@
       color: #fff;
       margin-top: 10px;
     }
+    #notesPanel, #historyPanel {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 100%;
+      height: 100vh;
+      background: #121212;
+      padding: 20px;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .visible {
+      left: 0 !important;
+    }
   </style>
 </head>
 <body>
-  <h1>7K Life Dashboard</h1>  <div class="section" id="glowup">
+  <h1>7K Life Dashboard</h1>
+  <div class="section tracker">
     <h2>Glow-Up Tracker</h2>
-    <div class="habit-list" id="habitList"></div>
-    <div class="add-habit">
-      <input type="text" id="newHabit" placeholder="New habit (e.g., Read)">
-      <button onclick="addHabit()">Add</button>
-    </div>
-  </div>  <div class="section" id="todos">
+    <div id="habits"></div>
+  </div>
+  <div class="section todo">
     <h2>To-Do List</h2>
-    <div class="add-habit">
-      <input type="text" id="newProject" placeholder="New folder/project">
-      <button onclick="addProject()">Add</button>
-    </div>
-    <div id="projectList"></div>
-  </div>  <div class="section journal">
+    <input type="text" id="todoInput" placeholder="Add a task...">
+    <button onclick="addTodo()">Add</button>
+    <ul id="todoList"></ul>
+  </div>
+  <div class="section journal">
     <h2>Journal</h2>
-    <textarea placeholder="Write your thoughts..." id="journal"></textarea>
-  </div>  <script>
-    const habitList = JSON.parse(localStorage.getItem('habits') || '[]');
-    const projects = JSON.parse(localStorage.getItem('projects') || '[]');
+    <textarea id="journalInput" placeholder="Write your thoughts..."></textarea>
+  </div>  <div id="notesPanel">
+    <h2>Advanced Notes</h2>
+    <textarea placeholder="Markdown style notes..."></textarea>
+    <button onclick="togglePanel('notesPanel')">Close</button>
+  </div>  <div id="historyPanel">
+    <h2>Journal History</h2>
+    <div id="journalHistory"></div>
+    <button onclick="togglePanel('historyPanel')">Close</button>
+  </div>  <div class="fab" onclick="openAddMenu()">+</div>  <script>
+    const habits = JSON.parse(localStorage.getItem('habits')) || ["Fap Streak", "Workout", "Sleep"];
+    const habitData = JSON.parse(localStorage.getItem('habitData')) || {};
 
     function renderHabits() {
-      const container = document.getElementById('habitList');
+      const container = document.getElementById('habits');
       container.innerHTML = '';
-      habitList.forEach((habit, index) => {
+      habits.forEach(habit => {
         const div = document.createElement('div');
-        div.className = 'habit-item';
-        div.innerHTML = `<input type="checkbox" ${habit.done ? 'checked' : ''} onchange="toggleHabit(${index})">${habit.name}`;
+        div.className = 'habit';
+        div.innerHTML = `<span>${habit}:</span><input type='text' value='${habitData[habit] || ''}' oninput='saveHabit("${habit}", this.value)'>`;
         container.appendChild(div);
       });
-      localStorage.setItem('habits', JSON.stringify(habitList));
     }
 
-    function toggleHabit(i) {
-      habitList[i].done = !habitList[i].done;
-      renderHabits();
+    function saveHabit(habit, value) {
+      habitData[habit] = value;
+      localStorage.setItem('habitData', JSON.stringify(habitData));
     }
 
-    function addHabit() {
-      const val = document.getElementById('newHabit').value.trim();
-      if (val) {
-        habitList.push({ name: val, done: false });
-        document.getElementById('newHabit').value = '';
-        renderHabits();
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const task = input.value.trim();
+      if (task !== '') {
+        const list = JSON.parse(localStorage.getItem('todoList')) || [];
+        list.push(task);
+        localStorage.setItem('todoList', JSON.stringify(list));
+        renderTodoList();
+        input.value = '';
       }
     }
 
-    function renderProjects() {
-      const container = document.getElementById('projectList');
-      container.innerHTML = '';
-      projects.forEach((project, pIndex) => {
-        const div = document.createElement('div');
-        div.className = 'todo-project';
-        div.innerHTML = `
-          <h3 onclick="toggleTasks(${pIndex})">${project.name}</h3>
-          <ul class="task-list" id="taskList-${pIndex}" style="display:none;"></ul>
-          <div class="add-habit">
-            <input type="text" id="taskInput-${pIndex}" placeholder="New task">
-            <button onclick="addTask(${pIndex})">Add</button>
-          </div>`;
-        container.appendChild(div);
-      });
-      saveProjects();
-    }
-
-    function toggleTasks(index) {
-      const el = document.getElementById(`taskList-${index}`);
-      el.style.display = el.style.display === 'none' ? 'block' : 'none';
-      renderTasks(index);
-    }
-
-    function renderTasks(index) {
-      const ul = document.getElementById(`taskList-${index}`);
+    function renderTodoList() {
+      const ul = document.getElementById('todoList');
       ul.innerHTML = '';
-      projects[index].tasks.forEach((task, tIndex) => {
+      const list = JSON.parse(localStorage.getItem('todoList')) || [];
+      list.forEach(task => {
         const li = document.createElement('li');
-        li.innerHTML = `<input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${index}, ${tIndex})"> ${task.name}`;
+        li.textContent = task;
         ul.appendChild(li);
       });
     }
 
-    function addProject() {
-      const val = document.getElementById('newProject').value.trim();
-      if (val) {
-        projects.push({ name: val, tasks: [] });
-        document.getElementById('newProject').value = '';
-        renderProjects();
+    function saveJournal() {
+      const entry = document.getElementById('journalInput').value;
+      const today = new Date().toISOString().split('T')[0];
+      let history = JSON.parse(localStorage.getItem('journalHistory')) || {};
+      history[today] = entry;
+      localStorage.setItem('journalHistory', JSON.stringify(history));
+    }
+
+    function renderJournalHistory() {
+      const container = document.getElementById('journalHistory');
+      const history = JSON.parse(localStorage.getItem('journalHistory')) || {};
+      container.innerHTML = '';
+      for (let date in history) {
+        const p = document.createElement('p');
+        p.innerHTML = `<strong>${date}:</strong> ${history[date]}`;
+        container.appendChild(p);
       }
     }
 
-    function addTask(pIndex) {
-      const input = document.getElementById(`taskInput-${pIndex}`);
-      const val = input.value.trim();
-      if (val) {
-        projects[pIndex].tasks.push({ name: val, done: false });
-        input.value = '';
-        renderTasks(pIndex);
-        saveProjects();
+    function openAddMenu() {
+      const habit = prompt("Add new habit name:");
+      if (habit) {
+        habits.push(habit);
+        localStorage.setItem('habits', JSON.stringify(habits));
+        renderHabits();
       }
     }
 
-    function toggleTask(pIndex, tIndex) {
-      projects[pIndex].tasks[tIndex].done = !projects[pIndex].tasks[tIndex].done;
-      renderTasks(pIndex);
-      saveProjects();
+    function togglePanel(id) {
+      document.getElementById(id).classList.toggle('visible');
     }
 
-    function saveProjects() {
-      localStorage.setItem('projects', JSON.stringify(projects));
-    }
+    let startX = 0;
+    document.body.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+    document.body.addEventListener('touchend', e => {
+      const deltaX = e.changedTouches[0].clientX - startX;
+      if (deltaX > 100) togglePanel('notesPanel');
+      else if (deltaX < -100) togglePanel('historyPanel');
+    });
 
-    // Initialize
-    renderHabits();
-    renderProjects();
+    window.onload = () => {
+      renderHabits();
+      renderTodoList();
+      setInterval(saveJournal, 5000);
+    };
   </script></body>
-  </html>
+</html>
