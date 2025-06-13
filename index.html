@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    
+    <meta name="theme-color" content="#00A79D"/>
+    <meta name="description" content="7K Life - A simple app for tracking habits, tasks, and thoughts.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="7K Life">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    
     <title>7K Life</title>
+    
+    <link rel="manifest" href="manifest.json">
+
     <style>
         /* --- Global Styles & Variables --- */
         :root {
@@ -289,7 +300,7 @@
         .study-content .study-icon { color: var(--primary-color); margin: 0 auto 1rem; }
         .study-content h2 { margin-bottom: 1rem; font-size: 20px; }
         .study-content p { color: var(--text-secondary-color); margin-bottom: 1.5rem; line-height: 1.6; }
-        .study-content img { width: 100%; border-radius: 8px; object-fit: cover; }
+        .study-content img { max-width: 100%; border-radius: 8px; object-fit: cover; }
 
         /* --- Modal (AI Assistant) --- */
         .modal {
@@ -347,9 +358,7 @@
 </head>
 <body>
 
-    <!-- Main App Container -->
     <div id="app">
-        <!-- Header -->
         <header class="app-header">
             <div class="logo">
                 <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -360,10 +369,8 @@
             <button class="header-btn" id="studyModeBtn">Study Mode</button>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
 
-            <!-- Habit Tracker -->
             <section class="card">
                 <div class="card-header">
                     <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -371,11 +378,9 @@
                 </div>
                 <p class="card-description">Monitor your key habits for self-improvement.</p>
                 <div id="habit-tracker-content" class="card-content">
-                    <!-- Habit items will be injected by JavaScript -->
-                </div>
+                    </div>
             </section>
 
-            <!-- To-Do List -->
             <section class="card">
                 <div class="card-header">
                     <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
@@ -399,12 +404,10 @@
                         </button>
                     </div>
                     <ul id="todoList" class="todo-list">
-                        <!-- To-Do items will be injected by JavaScript -->
-                    </ul>
+                        </ul>
                 </div>
             </section>
 
-            <!-- Journal -->
             <section class="card">
                 <div class="card-header">
                     <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.247-8.995l-1.623 1.082a6 6 0 00-2.82 5.51V18a2 2 0 002 2h12a2 2 0 002-2v-3.15a6 6 0 00-2.82-5.51l-1.623-1.082M12 6.253L14.82 4.5a2 2 0 012.36 0L20 6.253M12 6.253L9.18 4.5a2 2 0 00-2.36 0L4 6.253"></path></svg>
@@ -424,7 +427,6 @@
         </main>
     </div>
 
-    <!-- Floating Action Buttons -->
     <button id="notesFab" class="side-fab">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
     </button>
@@ -432,10 +434,8 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10V4c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5"/><path d="m11.5 8.5 3 3-3 3"/><path d="M4 14h5"/><path d="M14.5 19.5 18 21l1.5-3.5L23 16l-3.5-1.5L18 11l-1.5 3.5L13 16l1.5 3.5Z"/></svg>
     </button>
     
-    <!-- Panels and Modals (Initially Hidden) -->
     <div id="panel-overlay" class="panel-overlay"></div>
 
-    <!-- Journal History Panel -->
     <div id="historyPanel" class="panel panel-left">
         <div class="panel-header">
             <h3>Journal History</h3>
@@ -444,7 +444,6 @@
         <div id="historyContent" class="panel-content"></div>
     </div>
 
-    <!-- Advanced Notes Panel -->
     <div id="notesPanel" class="panel panel-right">
         <div class="panel-header">
             <h3>Advanced Notes</h3>
@@ -459,7 +458,6 @@
         </div>
     </div>
     
-    <!-- Study Mode Panel -->
     <div id="studyPanel" class="panel panel-left">
         <div class="panel-header">
             <h3>Study Mode</h3>
@@ -474,7 +472,6 @@
     </div>
 
 
-    <!-- AI Assistant Modal -->
     <div id="aiModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -841,8 +838,19 @@
 
             init();
         });
+
+        // --- SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
-
-
