@@ -1,756 +1,548 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>7K Life</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* ============================ */
-        /* Global CSS Settings & Variables */
-        /* ============================ */
+        /* --- Global Styles & Variables --- */
         :root {
-            --pure-white: #FFFFFF;
-            --jet-black: #000000;
-            --medium-gray: #B0B0B0;
-            --electric-blue: #007BFF;
-            --light-gray: #F0F0F0;
-            --dark-gray: #202020;
-            --soft-blue: #339AFF;
-            --placeholder-gray: #8A8A8A;
-            --danger-red: #DC3545;
-            --success-green: #28A745;
-            --warning-orange: #FFC107;
-            --font-family: 'Roboto', sans-serif;
+            --bg-color: #0f0f0f;
+            --card-color: #1c1c1c;
+            --border-color: #333;
+            --text-color: #e0e0e0;
+            --text-secondary-color: #8b949e;
+            --primary-color: #00A79D;
+            --primary-color-hover: #008a7f;
+            --danger-color: #dc3545;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        *, *::before, *::after {
-            box-sizing: border-box;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        html, body {
-            height: 100%;
-            width: 100%;
-            background-color: var(--light-gray);
+        html {
+            touch-action: manipulation; /* Prevents double-tap zoom */
+        }
+
+        body {
             font-family: var(--font-family);
-            color: var(--dark-gray);
-            overflow-x: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overscroll-behavior-x: none;
+            overflow-x: hidden; /* Prevent horizontal scroll from swipe gestures */
+        }
+        
+        /* --- App Layout --- */
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background-color: var(--medium-gray);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--light-gray);
-        }
-
-        /* ============================ */
-        /* Layout: Header, Sidebar, Main */
-        /* ============================ */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: var(--pure-white);
-            border-bottom: 1px solid var(--medium-gray);
+        .app-header .logo {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
+            gap: 12px;
         }
 
-        .header-left .hamburger-menu, .header-right .ai-icon {
-            font-size: 1.8rem;
+        .app-header h1 {
+            font-size: 24px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .header-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            font-size: 16px;
+            transition: color 0.2s;
         }
-        .header-left .hamburger-menu:hover, .header-right .ai-icon:hover {
-            color: var(--electric-blue);
-        }
-
-        .app-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--electric-blue);
-            cursor: pointer;
-        }
-
-        #sidebar {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 250px;
-            height: calc(100% - 60px);
-            background-color: var(--pure-white);
-            border-right: 1px solid var(--medium-gray);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 999;
-            overflow-y: auto;
-        }
-
-        body.sidebar-open #sidebar {
-            transform: translateX(0);
+        .header-btn:hover {
+            color: var(--text-color);
         }
 
         .main-content {
-            margin-top: 60px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
         }
 
-        @media (min-width: 1024px) {
-            #sidebar {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 250px;
-            }
-            .hamburger-menu {
-                display: none;
-            }
-        }
-
-        /* ============================ */
-        /* Sidebar Navigation         */
-        /* ============================ */
-        .nav-list {
-            list-style: none;
-            padding: 10px 0;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-            border-left: 4px solid transparent;
-        }
-
-        .nav-item .icon {
-            font-size: 1.25rem;
-            margin-right: 15px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .nav-item .label {
-            font-size: 1rem;
-            font-weight: 400;
-        }
-
-        .nav-item:hover {
-            background-color: var(--light-gray);
-        }
-
-        .nav-item.active {
-            background-color: var(--electric-blue);
-            color: var(--pure-white);
-            border-left-color: var(--soft-blue);
-        }
-        
-        .nav-item.active .label, .nav-item.active .icon {
-            color: var(--pure-white);
-        }
-
-
-        /* ============================ */
-        /* Main Content Sections      */
-        /* ============================ */
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        /* ============================ */
-        /* Helper & Component Classes   */
-        /* ============================ */
+        /* --- Card Component --- */
         .card {
-            background: var(--pure-white);
-            border-radius: 8px;
+            background-color: var(--card-color);
+            border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            font-size: 1rem;
-            font-weight: 700;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background-color: var(--electric-blue);
-            color: var(--pure-white);
-        }
-        .btn-primary:hover {
-            background-color: var(--soft-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-        }
-        
-        .btn-danger {
-            background-color: var(--danger-red);
-            color: var(--pure-white);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-            animation: slideDown 0.4s ease-out;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--medium-gray);
-            border-radius: 4px;
-        }
-        .form-group input::placeholder, .form-group textarea::placeholder {
-            color: var(--placeholder-gray);
-            font-style: italic;
-        }
-
-        /* ============================ */
-        /* To-Do List Section         */
-        /* ============================ */
-        #todo-list {
-            list-style: none;
-        }
-        .todo-item {
+        .card-header {
             display: flex;
             align-items: center;
-            padding: 15px;
-            background: #fff;
-            border: 1px solid #eee;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            gap: 12px;
+            color: var(--primary-color);
+        }
+        .card-icon { width: 24px; height: 24px; }
+        .card-header h2 { font-size: 20px; color: var(--text-color); }
+        .card-description { color: var(--text-secondary-color); font-size: 14px; margin-top: -12px; }
+        .card-content { display: flex; flex-direction: column; gap: 1rem; }
+
+        /* --- Form Elements --- */
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: var(--font-family);
+        }
+        input::placeholder, textarea::placeholder { color: var(--text-secondary-color); }
+        textarea { resize: vertical; min-height: 100px; }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             transition: background-color 0.2s;
         }
-        .todo-item.completed .todo-title {
-            text-decoration: line-through;
-            color: var(--medium-gray);
-        }
-        .todo-item input[type="checkbox"] {
-            margin-right: 15px;
-            width: 20px;
-            height: 20px;
-        }
-        .todo-title {
-            flex-grow: 1;
-        }
-        .todo-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 1.2rem;
-        }
-        
-        /* ============================ */
-        /* Habit Tracker Section      */
-        /* ============================ */
-        .habit-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .habit-card {
-            background: #fff;
-            padding: 20px;
+        .btn-primary:hover { background-color: var(--primary-color-hover); }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 12px 20px;
             border-radius: 8px;
-            border: 1px solid #eee;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
-        .habit-header {
+        .btn-outline:hover { background-color: #ffffff10; }
+
+        /* --- Habit Tracker Specific --- */
+        .habit-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            background-color: var(--bg-color);
+            padding: 8px 12px;
+            border-radius: 8px;
         }
-        .habit-title { font-size: 1.2rem; font-weight: 700; }
-        .habit-streak { font-size: 1.5rem; color: var(--electric-blue); font-weight: 700; }
-        .habit-calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 15px;
-        }
-        .calendar-day {
-            width: 30px;
-            height: 30px;
-            border-radius: 4px;
-            background: #eee;
-        }
-        .calendar-day.completed {
-            background: var(--success-green);
-        }
-        
-        /* ============================ */
-        /* Journal Section            */
-        /* ============================ */
-        .journal-layout {
-            display: flex;
-            gap: 20px;
-        }
-        #journal-list-container {
-            flex: 0 0 300px;
-        }
-        #journal-entry-list { list-style: none; }
-        .journal-list-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .journal-list-item:hover { background: #f9f9f9; }
-        .journal-list-item.active { background: var(--soft-blue); color: white; }
-        
-        #journal-editor-container {
-            flex-grow: 1;
-        }
-        #journal-title-display, #journal-content-display {
-             background: white; padding: 15px; border-radius: 4px;
-        }
-         #journal-title-display { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .habit-name { display: flex; align-items: center; gap: 10px; }
+        .habit-name svg { width: 20px; height: 20px; color: var(--text-secondary-color); }
+        .habit-controls { display: flex; align-items: center; gap: 10px; }
+        .habit-controls .btn-circle { background: var(--border-color); border: none; color: var(--text-color); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;}
+        .habit-controls .habit-value { font-weight: 600; min-width: 70px; text-align: center; }
 
+        /* Custom Switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        /* ============================ */
-        /* Notepad Section             */
-        /* ============================ */
-        #notepad-textarea {
-            width: 100%;
-            height: 60vh;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            border: 1px solid var(--medium-gray);
-            border-radius: 4px;
-            resize: vertical;
-        }
-        .notepad-actions { margin-top: 10px; display: flex; gap: 10px;}
+        /* --- To-Do List Specific --- */
+        .add-task-form { display: flex; flex-direction: column; gap: 1rem; }
+        .task-options { display: flex; gap: 1rem; }
+        .todo-list { list-style: none; display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .todo-item { display: flex; align-items: center; gap: 12px; background: var(--bg-color); padding: 12px; border-radius: 8px; }
+        .todo-item.completed { opacity: 0.6; }
+        .todo-item.completed label { text-decoration: line-through; }
+        .todo-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary-color); cursor: pointer; }
+        .todo-item label { flex-grow: 1; }
+        .priority-badge { font-size: 12px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+        .priority-low { background-color: #28a74533; color: #28a745; }
+        .priority-medium { background-color: #ffc10733; color: #ffc107; }
+        .priority-high { background-color: #dc354533; color: #dc3545; }
+        .task-date { font-size: 12px; color: var(--text-secondary-color); margin-left: auto; }
+        .delete-task-btn { background: transparent; border: none; color: var(--text-secondary-color); cursor: pointer; font-size: 20px; padding: 5px; }
+        .delete-task-btn:hover { color: var(--danger-color); }
+        #todoList p { text-align: center; color: var(--text-secondary-color); padding: 20px; }
 
-        /* ============================ */
-        /* Study Hub Section          */
-        /* ============================ */
-        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
-        .tab-button {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 1rem;
-            font-weight: 700;
-            border-bottom: 3px solid transparent;
-        }
-        .tab-button.active { border-bottom-color: var(--electric-blue); color: var(--electric-blue); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        #quiz-container { display: none; }
-        .quiz-question { margin-bottom: 20px; }
-        .quiz-options button {
-            display: block; width: 100%; text-align: left;
-            padding: 10px; margin: 5px 0;
-            background: #fff; border: 1px solid #ddd;
-            border-radius: 4px; cursor: pointer;
-        }
-        .quiz-options button:hover { background: #f0f0f0; }
-        .quiz-options button.correct { background: var(--success-green); color: white; }
-        .quiz-options button.incorrect { background: var(--danger-red); color: white; }
-        #quiz-results { display: none; }
+        /* --- Journal Specific --- */
+        .journal-actions { display: flex; gap: 1rem; }
+        .journal-actions button { flex: 1; }
 
-        /* ============================ */
-        /* AI Chat Panel              */
-        /* ============================ */
-        #aiChatPanel {
+        /* --- Floating Action Button (FAB) & Side Buttons --- */
+        .fab, .side-fab {
             position: fixed;
-            top: 60px;
-            right: 0;
-            width: 350px;
-            height: calc(100% - 60px);
-            background: var(--pure-white);
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .fab {
+            bottom: 30px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .side-fab {
+            bottom: 30px;
+            left: 20px;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- Panels (History, Notes, Study) --- */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .panel-overlay.active { opacity: 1; visibility: visible; }
+
+        .panel {
+            position: fixed;
+            top: 0;
+            width: 90%;
+            max-width: 400px;
+            height: 100%;
+            background-color: var(--card-color);
+            z-index: 1002;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease-in-out;
         }
-        body.ai-panel-open #aiChatPanel { transform: translateX(0); }
+        .panel-left { left: 0; transform: translateX(-100%); }
+        .panel-right { right: 0; transform: translateX(100%); }
+        .panel.active { transform: translateX(0); }
 
-        .ai-chat-header {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+        .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
         }
-        .ai-chat-window {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
+        .panel-header h3 { color: var(--primary-color); font-size: 20px; }
+        .close-btn { background: none; border: none; color: var(--text-secondary-color); font-size: 30px; cursor: pointer; padding: 5px; line-height: 1; }
+
+        .panel-content { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .panel-footer { padding: 15px 20px; border-top: 1px solid var(--border-color); display:flex; justify-content: space-between; align-items:center; }
+        #notesLastSaved { font-size: 12px; color: var(--text-secondary-color); }
+        #advancedNotesInput { height: 100%; }
+
+        /* History Panel Content */
+        .history-entry { border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .history-entry p { white-space: pre-wrap; margin-bottom: 10px; }
+        .history-meta { display: flex; flex-wrap: wrap; gap: 15px; font-size: 12px; color: var(--text-secondary-color); }
+        .history-meta span { display: flex; align-items: center; gap: 5px; }
+        .history-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;}
+        .history-tag { background: var(--border-color); padding: 3px 8px; border-radius: 12px; font-size: 12px;}
+        
+        /* Study Panel Content */
+        .study-content { text-align: center; }
+        .study-content .study-icon { color: var(--primary-color); margin: 0 auto 1rem; }
+        .study-content h2 { margin-bottom: 1rem; font-size: 20px; }
+        .study-content p { color: var(--text-secondary-color); margin-bottom: 1.5rem; line-height: 1.6; }
+        .study-content img { width: 100%; border-radius: 8px; object-fit: cover; }
+
+        /* --- Modal (AI Assistant) --- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 1.5rem;
+            transform: scale(0.95);
+            transition: transform 0.3s;
         }
-        .chat-message {
-            padding: 10px 15px;
-            border-radius: 18px;
-            max-width: 80%;
-            line-height: 1.4;
-        }
-        .user-message {
-            background: var(--electric-blue);
-            color: white;
-            border-bottom-right-radius: 4px;
-            align-self: flex-end;
-        }
-        .ai-message {
-            background: var(--light-gray);
-            color: var(--dark-gray);
-            border-bottom-left-radius: 4px;
-            align-self: flex-start;
-        }
-        .ai-input-area {
+        .modal.active .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 20px; display:flex; align-items:center; gap: 10px; }
+        .modal-body { display: flex; flex-direction: column; gap: 1rem; }
+        .modal-body p { color: var(--text-secondary-color); }
+        .ai-option {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             padding: 15px;
-            border-top: 1px solid #eee;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 4px;
         }
-        #ai-input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-        }
+        .ai-option span { color: var(--text-secondary-color); font-size: 14px; }
+        .ai-option:hover { background-color: #ffffff10; }
+        .modal-footer { display: flex; justify-content: flex-end;}
+
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-left">
-            <span class="hamburger-menu">☰</span>
-        </div>
-        <div class="app-logo">7K Life</div>
-        <div class="header-right">
-            <span class="ai-icon">🤖</span>
-        </div>
-    </header>
 
-    <aside id="sidebar">
-        <nav>
-            <ul class="nav-list">
-                <li data-target="dashboardSection" class="nav-item active">
-                    <span class="icon">🏠</span><span class="label">Dashboard</span>
-                </li>
-                <li data-target="todoSection" class="nav-item">
-                    <span class="icon">✅</span><span class="label">To-Do List</span>
-                </li>
-                <li data-target="habitSection" class="nav-item">
-                    <span class="icon">🏋️</span><span class="label">Habit Tracker</span>
-                </li>
-                <li data-target="journalSection" class="nav-item">
-                    <span class="icon">📓</span><span class="label">Journal</span>
-                </li>
-                <li data-target="notepadSection" class="nav-item">
-                    <span class="icon">📝</span><span class="label">Notepad</span>
-                </li>
-                <li data-target="studySection" class="nav-item">
-                    <span class="icon">📚</span><span class="label">Study Hub</span>
-                </li>
-                <li data-target="settingsSection" class="nav-item">
-                    <span class="icon">⚙️</span><span class="label">Settings</span>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <section id="dashboardSection" class="content-section active">
-            <h2>Dashboard</h2>
-            <div class="card">
-                <h3>Welcome!</h3>
-                <p>This is your all-in-one productivity hub. Select a module from the sidebar to get started.</p>
+    <!-- Main App Container -->
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" stroke="#00A79D" stroke-width="4"/>
+                </svg>
+                <h1>7K Life</h1>
             </div>
-        </section>
+            <button class="header-btn" id="studyModeBtn">Study Mode</button>
+        </header>
 
-        <section id="todoSection" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>To-Do List</h2>
-                <button id="add-task-btn" class="btn btn-primary">Add Task</button>
-            </div>
-            <div class="card">
-                <ul id="todo-list">
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Habit Tracker -->
+            <section class="card">
+                <div class="card-header">
+                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    <h2>Habit Tracker</h2>
+                </div>
+                <p class="card-description">Monitor your key habits for self-improvement.</p>
+                <div id="habit-tracker-content" class="card-content">
+                    <!-- Habit items will be injected by JavaScript -->
+                </div>
+            </section>
+
+            <!-- To-Do List -->
+            <section class="card">
+                <div class="card-header">
+                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <h2>To-Do List</h2>
+                </div>
+                <p class="card-description">Organize your tasks and stay productive.</p>
+                <div class="card-content">
+                    <div class="add-task-form">
+                        <input type="text" id="taskInput" placeholder="Add a new task...">
+                        <div class="task-options">
+                            <select id="taskPriority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                            <input type="date" id="taskDate" title="Due Date">
+                        </div>
+                        <button id="addTaskBtn" class="btn-primary">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Add Task
+                        </button>
+                    </div>
+                    <ul id="todoList" class="todo-list">
+                        <!-- To-Do items will be injected by JavaScript -->
                     </ul>
-            </div>
-        </section>
-        
-        <section id="habitSection" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Habit Tracker</h2>
-                <button id="add-habit-btn" class="btn btn-primary">Add Habit</button>
-            </div>
-            <div id="habit-grid-container" class="habit-grid">
                 </div>
-        </section>
+            </section>
 
-        <section id="journalSection" class="content-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Journal</h2>
-                <button id="new-entry-btn" class="btn btn-primary">New Entry</button>
-            </div>
-            <div class="journal-layout">
-                <div id="journal-list-container" class="card">
-                    <h3>Entries</h3>
-                    <ul id="journal-entry-list"></ul>
+            <!-- Journal -->
+            <section class="card">
+                <div class="card-header">
+                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.247-8.995l-1.623 1.082a6 6 0 00-2.82 5.51V18a2 2 0 002 2h12a2 2 0 002-2v-3.15a6 6 0 00-2.82-5.51l-1.623-1.082M12 6.253L14.82 4.5a2 2 0 012.36 0L20 6.253M12 6.253L9.18 4.5a2 2 0 00-2.36 0L4 6.253"></path></svg>
+                    <h2>Journal</h2>
                 </div>
-                <div id="journal-editor-container" class="card">
-                    <div id="journal-viewer">
-                        <h3 id="journal-title-display">Select an entry to read</h3>
-                        <div id="journal-content-display"></div>
+                <p class="card-description">Reflect on your day, thoughts, and experiences.</p>
+                <div class="card-content">
+                    <textarea id="journalInput" placeholder="Write your thoughts here..."></textarea>
+                    <input type="text" id="journalMood" placeholder="Mood (optional): e.g., Happy, Calm">
+                    <input type="text" id="journalTags" placeholder="Tags (comma-separated): e.g., work, idea">
+                    <div class="journal-actions">
+                        <button id="viewHistoryBtn" class="btn-outline">View History</button>
+                        <button id="saveJournalBtn" class="btn-primary">Save</button>
                     </div>
                 </div>
-            </div>
-        </section>
-        
-        <section id="notepadSection" class="content-section">
-            <h2>Notepad</h2>
-            <div class="card">
-                <textarea id="notepad-textarea" placeholder="Start writing your notes here..."></textarea>
-                <div class="notepad-actions">
-                    <button id="save-note-btn" class="btn btn-primary">Save Note</button>
-                    <button id="clear-note-btn" class="btn btn-danger">Clear All</button>
-                </div>
-            </div>
-        </section>
+            </section>
+        </main>
+    </div>
 
-        <section id="studySection" class="content-section">
-            <h2>Study Hub</h2>
-            <div class="card">
-                <div id="quiz-setup">
-                    <h3>Start a Quiz</h3>
-                    <div class="form-group">
-                        <label for="quiz-topic">Select Topic:</label>
-                        <select id="quiz-topic" class="form-group">
-                            <option value="clat_english">CLAT - English</option>
-                            <option value="mhcet_math">MHCET - Mathematics</option>
-                        </select>
-                    </div>
-                    <button id="start-quiz-btn" class="btn btn-primary">Start Quiz</button>
-                </div>
-
-                <div id="quiz-container">
-                    <h3 id="quiz-question-title"></h3>
-                    <div id="quiz-options" class="quiz-options"></div>
-                    <button id="next-question-btn" class="btn btn-primary" style="margin-top: 20px;">Next</button>
-                </div>
-
-                <div id="quiz-results">
-                    <h3>Quiz Over!</h3>
-                    <p id="quiz-score"></p>
-                    <button id="restart-quiz-btn" class="btn btn-primary">Try Again</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="settingsSection" class="content-section">
-            <h2>Settings</h2>
-            <div class="card">
-                <h3>Data Management</h3>
-                <div class="form-group">
-                    <label for="api-key-input">Gemini API Key</label>
-                    <input type="password" id="api-key-input" placeholder="Enter your Gemini API Key">
-                    <button id="save-api-key-btn" class="btn btn-primary" style="margin-top: 10px;">Save Key</button>
-                </div>
-                <hr style="margin: 20px 0;">
-                <button id="export-data-btn" class="btn btn-primary">Export All Data</button>
-                <button id="clear-data-btn" class="btn btn-danger">Clear All Data</button>
-            </div>
-        </section>
-    </main>
+    <!-- Floating Action Buttons -->
+    <button id="notesFab" class="side-fab">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+    </button>
+    <button id="aiFab" class="fab">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10V4c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5"/><path d="m11.5 8.5 3 3-3 3"/><path d="M4 14h5"/><path d="M14.5 19.5 18 21l1.5-3.5L23 16l-3.5-1.5L18 11l-1.5 3.5L13 16l1.5 3.5Z"/></svg>
+    </button>
     
-    <aside id="aiChatPanel">
-        <div class="ai-chat-header">
-            <h3>AI Assistant</h3>
-            <span id="close-ai-panel" class="close-btn">&times;</span>
-        </div>
-        <div class="ai-chat-window" id="ai-chat-window">
-             </div>
-        <div class="ai-input-area">
-            <input type="text" id="ai-input" placeholder="Ask me anything...">
-            <button id="ai-send-btn" class="btn btn-primary">Send</button>
-        </div>
-    </aside>
+    <!-- Panels and Modals (Initially Hidden) -->
+    <div id="panel-overlay" class="panel-overlay"></div>
 
-    <div id="task-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3 id="modal-title">Add Task</h3>
-        <form id="task-form">
-          <input type="hidden" id="task-id">
-          <div class="form-group">
-            <label for="task-title">Title</label>
-            <input type="text" id="task-title" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Save Task</button>
-        </form>
-      </div>
+    <!-- Journal History Panel -->
+    <div id="historyPanel" class="panel panel-left">
+        <div class="panel-header">
+            <h3>Journal History</h3>
+            <button class="close-btn" data-target="historyPanel">×</button>
+        </div>
+        <div id="historyContent" class="panel-content"></div>
+    </div>
+
+    <!-- Advanced Notes Panel -->
+    <div id="notesPanel" class="panel panel-right">
+        <div class="panel-header">
+            <h3>Advanced Notes</h3>
+            <button class="close-btn" data-target="notesPanel">×</button>
+        </div>
+        <div class="panel-content">
+            <textarea id="advancedNotesInput" placeholder="Jot down your detailed thoughts and ideas..."></textarea>
+        </div>
+        <div class="panel-footer">
+            <span id="notesLastSaved"></span>
+            <button id="saveNoteBtn" class="btn-primary">Save Note</button>
+        </div>
     </div>
     
-    <div id="habit-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>Add Habit</h3>
-        <form id="habit-form">
-          <div class="form-group">
-            <label for="habit-title-input">Habit Name</label>
-            <input type="text" id="habit-title-input" required placeholder="e.g., Read for 30 minutes">
-          </div>
-          <button type="submit" class="btn btn-primary">Save Habit</button>
-        </form>
-      </div>
+    <!-- Study Mode Panel -->
+    <div id="studyPanel" class="panel panel-left">
+        <div class="panel-header">
+            <h3>Study Mode</h3>
+            <button class="close-btn" data-target="studyPanel">×</button>
+        </div>
+        <div class="panel-content study-content">
+            <svg width="64" height="64" class="study-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/></svg>
+            <h2>Your dedicated zone for CLAT / MHCET preparation.</h2>
+            <p>This section is under active development. Soon you'll find flashcards, quizzes, study materials, and AI-powered learning tools here!</p>
+            <img src="https://placehold.co/600x400/1c1c1c/8b949e?text=Coming+Soon" alt="Students studying">
+        </div>
     </div>
 
-    <div id="journal-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>New Journal Entry</h3>
-        <form id="journal-form">
-            <input type="hidden" id="journal-id">
-            <div class="form-group">
-                <label for="journal-title-input">Title</label>
-                <input type="text" id="journal-title-input" required>
-            </div>
-            <div class="form-group">
-                <label for="journal-content-input">Content</label>
-                <textarea id="journal-content-input" rows="10" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Save Entry</button>
-        </form>
-      </div>
-    </div>
 
+    <!-- AI Assistant Modal -->
+    <div id="aiModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10V4c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5"/><path d="m11.5 8.5 3 3-3 3"/><path d="M4 14h5"/><path d="M14.5 19.5 18 21l1.5-3.5L23 16l-3.5-1.5L18 11l-1.5 3.5L13 16l1.5 3.5Z"/></svg>AI Assistant</h3>
+                <button class="close-btn" data-target="aiModal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>What would you like the AI assistant to help you with?</p>
+                <button class="ai-option">Generate To-Do List Ideas<span>Get suggestions for tasks based on a prompt.</span></button>
+                <button class="ai-option">Summarize My Journal<span>Identify recurring themes in your entries.</span></button>
+                <button class="ai-option">Explain a Topic<span>Get explanations for concepts or questions.</span></button>
+            </div>
+             <div class="modal-footer">
+                <button class="btn-outline close-btn" data-target="aiModal">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // ============================
-            // State Management & Constants
-            // ============================
-            const GEMINI_API_KEY = "AIzaSyAkom_AkwohBhh9YTp066DpFxjtokobUy4"; // As requested
+            // --- STATE MANAGEMENT ---
             let state = {
-                todos: [],
-                habits: [],
-                journalEntries: [],
-                notepadContent: '',
-                settings: {
-                    apiKey: ''
+                habits: {
+                    streak: { name: 'Streak', value: 0 },
+                    workout: { name: 'Workout Today', value: false },
+                    sleep: { name: 'Sleep (last night)', value: 5 },
                 },
-                quizHistory: [],
+                todos: [],
+                journal: [],
+                advancedNote: {
+                    text: '',
+                    lastSaved: null
+                }
             };
+
+            // --- DOM ELEMENT SELECTORS ---
+            const habitContainer = document.getElementById('habit-tracker-content');
+            const todoList = document.getElementById('todoList');
+            const taskInput = document.getElementById('taskInput');
+            const taskPriority = document.getElementById('taskPriority');
+            const taskDate = document.getElementById('taskDate');
+            const addTaskBtn = document.getElementById('addTaskBtn');
             
-            const quizBank = {
-                clat_english: [
-                    { question: "Which of the following is a synonym for 'ephemeral'?", options: ["Eternal", "Transient", "Strong", "Beautiful"], answer: "Transient" },
-                    { question: "Identify the correct spelling.", options: ["Mischievious", "Mischeivous", "Mischievous", "Mischevious"], answer: "Mischievous" },
-                ],
-                mhcet_math: [
-                    { question: "What is the value of 5! (5 factorial)?", options: ["25", "120", "60", "100"], answer: "120" },
-                    { question: "If a triangle has angles 45, 45, and x, what is x?", options: ["45", "90", "60", "180"], answer: "90" },
-                ]
-            };
+            const journalInput = document.getElementById('journalInput');
+            const journalMood = document.getElementById('journalMood');
+            const journalTags = document.getElementById('journalTags');
+            const saveJournalBtn = document.getElementById('saveJournalBtn');
+            const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+            
+            const historyPanel = document.getElementById('historyPanel');
+            const historyContent = document.getElementById('historyContent');
+            const notesPanel = document.getElementById('notesPanel');
+            const advancedNotesInput = document.getElementById('advancedNotesInput');
+            const saveNoteBtn = document.getElementById('saveNoteBtn');
+            const notesLastSaved = document.getElementById('notesLastSaved');
+            const studyPanel = document.getElementById('studyPanel');
+            const studyModeBtn = document.getElementById('studyModeBtn');
+            
+            const aiFab = document.getElementById('aiFab');
+            const notesFab = document.getElementById('notesFab');
+            const aiModal = document.getElementById('aiModal');
+            
+            const overlay = document.getElementById('panel-overlay');
 
-
-            // ============================
-            // DOM Element Selectors
-            // ============================
-            const mainContent = document.querySelector('.main-content');
-            const navItems = document.querySelectorAll('.nav-item');
-            const contentSections = document.querySelectorAll('.content-section');
-            const hamburgerMenu = document.querySelector('.hamburger-menu');
-            const aiIcon = document.querySelector('.ai-icon');
-            const aiChatPanel = document.getElementById('aiChatPanel');
-            const closeAiPanelBtn = document.getElementById('close-ai-panel');
-
-            // ============================
-            // General App Initialization
-            // ============================
-            function init() {
-                loadState();
-                initNavigation();
-                initToDoModule();
-                initHabitModule();
-                initJournalModule();
-                initNotepadModule();
-                initStudyModule();
-                initSettingsModule();
-                initAIModule();
+            // --- DATA PERSISTENCE (LocalStorage) ---
+            function saveState() {
+                localStorage.setItem('7kLifeState', JSON.stringify(state));
             }
 
             function loadState() {
@@ -758,479 +550,299 @@
                 if (savedState) {
                     state = JSON.parse(savedState);
                 }
-                // Use the hardcoded key if no user key is saved
-                if (!state.settings.apiKey) {
-                    state.settings.apiKey = GEMINI_API_KEY;
-                }
             }
 
-            function saveState() {
-                localStorage.setItem('7kLifeState', JSON.stringify(state));
+            // --- RENDER FUNCTIONS ---
+            function renderHabits() {
+                habitContainer.innerHTML = `
+                    <div class="habit-item">
+                        <div class="habit-name">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88l-4.242 4.242z"></path></svg>
+                            <input type="text" data-habit="streak" class="habit-name-input" value="${state.habits.streak.name}">
+                        </div>
+                        <div class="habit-controls">
+                            <button class="btn-circle" data-habit="streak" data-action="decrease">-</button>
+                            <span class="habit-value">${state.habits.streak.value} days</span>
+                            <button class="btn-circle" data-habit="streak" data-action="increase">+</button>
+                        </div>
+                    </div>
+                    <div class="habit-item">
+                        <div class="habit-name">
+                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l-3 3m1 5l-4 4-3-3m5 5l3 3m5-14l-3 3M1 11h4m14 0h4m-7-7l3-3m-1 5l4-4m-3 3l-3 3"></path></svg>
+                            <span>${state.habits.workout.name}</span>
+                        </div>
+                        <div class="habit-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="workoutToggle" ${state.habits.workout.value ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="habit-item">
+                        <div class="habit-name">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                            <span>${state.habits.sleep.name}</span>
+                        </div>
+                        <div class="habit-controls">
+                            <input type="number" value="${state.habits.sleep.value}" min="0" max="24" step="0.5" id="sleepInput" style="width: 60px; text-align: center; background: var(--border-color); border:none;">
+                            <span style="color:var(--text-secondary-color)">h</span>
+                        </div>
+                    </div>
+                `;
+                // Add event listeners after rendering
+                document.getElementById('workoutToggle').addEventListener('change', handleWorkoutToggle);
+                document.getElementById('sleepInput').addEventListener('change', handleSleepInput);
+                document.querySelector('.habit-name-input').addEventListener('change', handleHabitNameChange);
             }
-
-            // ============================
-            // Navigation
-            // ============================
-            function initNavigation() {
-                navItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        const targetId = item.getAttribute('data-target');
-                        
-                        navItems.forEach(nav => nav.classList.remove('active'));
-                        item.classList.add('active');
-                        
-                        contentSections.forEach(section => {
-                            section.classList.remove('active');
-                            if (section.id === targetId) {
-                                section.classList.add('active');
-                            }
-                        });
-
-                        if (window.innerWidth < 1024) {
-                            document.body.classList.remove('sidebar-open');
-                        }
-                    });
-                });
-                
-                hamburgerMenu.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
-                aiIcon.addEventListener('click', () => document.body.classList.add('ai-panel-open'));
-                closeAiPanelBtn.addEventListener('click', () => document.body.classList.remove('ai-panel-open'));
-                document.querySelector('.app-logo').addEventListener('click', () => {
-                    document.querySelector('.nav-item[data-target="dashboardSection"]').click();
-                });
-            }
-
-            // ============================
-            // Modal Helpers
-            // ============================
-            function openModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
-            function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-            document.querySelectorAll('.modal .close-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.target.closest('.modal').style.display = 'none';
-                });
-            });
-
-            // ============================
-            // To-Do Module
-            // ============================
-            function initToDoModule() {
-                const todoList = document.getElementById('todo-list');
-                const addTaskBtn = document.getElementById('add-task-btn');
-                const taskModal = document.getElementById('task-modal');
-                const taskForm = document.getElementById('task-form');
-                const taskIdInput = document.getElementById('task-id');
-                const taskTitleInput = document.getElementById('task-title');
-
-                function renderTodos() {
-                    todoList.innerHTML = '';
-                    if (state.todos.length === 0) {
-                        todoList.innerHTML = '<p>No tasks yet. Add one!</p>';
-                        return;
-                    }
-                    state.todos.forEach(todo => {
-                        const li = document.createElement('li');
-                        li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-                        li.dataset.id = todo.id;
-                        li.innerHTML = `
-                            <input type="checkbox" ${todo.completed ? 'checked' : ''}>
-                            <span class="todo-title">${todo.title}</span>
-                            <div class="todo-actions">
-                                <button class="delete-btn">🗑️</button>
-                            </div>
-                        `;
-                        todoList.appendChild(li);
-                    });
+            
+            function renderTodos() {
+                todoList.innerHTML = '';
+                if (state.todos.length === 0) {
+                    todoList.innerHTML = '<p>No tasks yet. Add some!</p>';
+                    return;
                 }
                 
-                addTaskBtn.addEventListener('click', () => {
-                    taskForm.reset();
-                    taskIdInput.value = '';
-                    document.getElementById('modal-title').innerText = 'Add Task';
-                    openModal('task-modal');
-                });
-
-                taskForm.addEventListener('submit', e => {
-                    e.preventDefault();
-                    const title = taskTitleInput.value.trim();
-                    if (!title) return;
+                state.todos.sort((a,b) => a.completed - b.completed).forEach((todo, index) => {
+                    const li = document.createElement('li');
+                    li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                    li.dataset.id = todo.id;
                     
-                    const newTodo = { id: Date.now(), title, completed: false };
-                    state.todos.push(newTodo);
-                    
-                    saveState();
-                    renderTodos();
-                    closeModal('task-modal');
-                });
-                
-                todoList.addEventListener('click', e => {
-                    const target = e.target;
-                    const todoItem = target.closest('.todo-item');
-                    if (!todoItem) return;
-                    const todoId = Number(todoItem.dataset.id);
+                    const priorityClass = `priority-${todo.priority}`;
+                    const formattedDate = todo.date ? new Date(todo.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
-                    if (target.type === 'checkbox') {
-                        const todo = state.todos.find(t => t.id === todoId);
-                        todo.completed = target.checked;
-                    } else if (target.classList.contains('delete-btn')) {
-                        state.todos = state.todos.filter(t => t.id !== todoId);
-                    }
-                    saveState();
-                    renderTodos();
-                });
-
-                renderTodos();
-            }
-
-            // ============================
-            // Habit Module
-            // ============================
-            function initHabitModule() {
-                const habitGrid = document.getElementById('habit-grid-container');
-                const addHabitBtn = document.getElementById('add-habit-btn');
-                const habitForm = document.getElementById('habit-form');
-                const habitTitleInput = document.getElementById('habit-title-input');
-
-                function renderHabits() {
-                    habitGrid.innerHTML = '';
-                    if(state.habits.length === 0) {
-                        habitGrid.innerHTML = '<p>No habits being tracked. Add one to start!</p>';
-                        return;
-                    }
-                    state.habits.forEach(habit => {
-                        const today = new Date().toISOString().split('T')[0];
-                        const completedToday = habit.completedOn.includes(today);
-
-                        const card = document.createElement('div');
-                        card.className = 'habit-card';
-                        card.dataset.id = habit.id;
-                        card.innerHTML = `
-                            <div class="habit-header">
-                                <h4 class="habit-title">${habit.title}</h4>
-                                <span class="habit-streak">🔥 ${habit.streak}</span>
-                            </div>
-                            <p>Completed today: ${completedToday ? 'Yes' : 'No'}</p>
-                            <button class="complete-habit-btn btn ${completedToday ? '' : 'btn-primary'}" ${completedToday ? 'disabled' : ''}>
-                                ${completedToday ? 'Done for Today!' : 'Mark as Done'}
-                            </button>
-                        `;
-                        habitGrid.appendChild(card);
-                    });
-                }
-                
-                addHabitBtn.addEventListener('click', () => openModal('habit-modal'));
-
-                habitForm.addEventListener('submit', e => {
-                    e.preventDefault();
-                    const title = habitTitleInput.value.trim();
-                    if (!title) return;
-
-                    const newHabit = {
-                        id: Date.now(),
-                        title,
-                        streak: 0,
-                        completedOn: []
-                    };
-                    state.habits.push(newHabit);
-                    saveState();
-                    renderHabits();
-                    closeModal('habit-modal');
-                });
-                
-                habitGrid.addEventListener('click', e => {
-                    if (e.target.classList.contains('complete-habit-btn')) {
-                        const habitId = Number(e.target.closest('.habit-card').dataset.id);
-                        const habit = state.habits.find(h => h.id === habitId);
-                        const today = new Date().toISOString().split('T')[0];
-                        if (!habit.completedOn.includes(today)) {
-                            habit.completedOn.push(today);
-                            habit.streak++; // Simple streak logic
-                            saveState();
-                            renderHabits();
-                        }
-                    }
-                });
-
-                renderHabits();
-            }
-
-            // ============================
-            // Journal Module
-            // ============================
-            function initJournalModule() {
-                const newEntryBtn = document.getElementById('new-entry-btn');
-                const journalForm = document.getElementById('journal-form');
-                const journalList = document.getElementById('journal-entry-list');
-                const titleDisplay = document.getElementById('journal-title-display');
-                const contentDisplay = document.getElementById('journal-content-display');
-
-                function renderJournalList() {
-                    journalList.innerHTML = '';
-                    state.journalEntries.sort((a, b) => b.id - a.id).forEach(entry => {
-                        const li = document.createElement('li');
-                        li.className = 'journal-list-item';
-                        li.dataset.id = entry.id;
-                        li.textContent = entry.title;
-                        journalList.appendChild(li);
-                    });
-                }
-
-                function viewJournalEntry(id) {
-                    const entry = state.journalEntries.find(e => e.id === id);
-                    if (entry) {
-                        titleDisplay.textContent = entry.title;
-                        contentDisplay.innerHTML = entry.content.replace(/\n/g, '<br>'); // Display newlines correctly
-                    }
-                }
-                
-                newEntryBtn.addEventListener('click', () => {
-                    journalForm.reset();
-                    document.getElementById('journal-id').value = '';
-                    openModal('journal-modal');
-                });
-                
-                journalForm.addEventListener('submit', e => {
-                    e.preventDefault();
-                    const title = document.getElementById('journal-title-input').value.trim();
-                    const content = document.getElementById('journal-content-input').value.trim();
-                    if(!title || !content) return;
-
-                    const newEntry = { id: Date.now(), title, content };
-                    state.journalEntries.push(newEntry);
-                    saveState();
-                    renderJournalList();
-                    viewJournalEntry(newEntry.id);
-                    closeModal('journal-modal');
-                });
-                
-                journalList.addEventListener('click', e => {
-                    if (e.target.classList.contains('journal-list-item')) {
-                        const id = Number(e.target.dataset.id);
-                        viewJournalEntry(id);
-                        document.querySelectorAll('.journal-list-item').forEach(i => i.classList.remove('active'));
-                        e.target.classList.add('active');
-                    }
-                });
-                
-                renderJournalList();
-            }
-
-            // ============================
-            // Notepad Module
-            // ============================
-            function initNotepadModule() {
-                const notepad = document.getElementById('notepad-textarea');
-                const saveBtn = document.getElementById('save-note-btn');
-                const clearBtn = document.getElementById('clear-note-btn');
-
-                notepad.value = state.notepadContent;
-
-                saveBtn.addEventListener('click', () => {
-                    state.notepadContent = notepad.value;
-                    saveState();
-                    alert('Note saved!');
-                });
-
-                clearBtn.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to clear the notepad?')) {
-                        notepad.value = '';
-                        state.notepadContent = '';
-                        saveState();
-                    }
-                });
-            }
-
-            // ============================
-            // Study Hub Module
-            // ============================
-            function initStudyModule() {
-                const quizSetup = document.getElementById('quiz-setup');
-                const quizContainer = document.getElementById('quiz-container');
-                const quizResults = document.getElementById('quiz-results');
-                const startBtn = document.getElementById('start-quiz-btn');
-                const restartBtn = document.getElementById('restart-quiz-btn');
-                const nextBtn = document.getElementById('next-question-btn');
-                const questionTitle = document.getElementById('quiz-question-title');
-                const optionsContainer = document.getElementById('quiz-options');
-                
-                let currentQuiz = [];
-                let currentQuestionIndex = 0;
-                let score = 0;
-
-                function startQuiz() {
-                    const topic = document.getElementById('quiz-topic').value;
-                    currentQuiz = quizBank[topic];
-                    currentQuestionIndex = 0;
-                    score = 0;
-                    
-                    quizSetup.style.display = 'none';
-                    quizResults.style.display = 'none';
-                    quizContainer.style.display = 'block';
-                    
-                    showQuestion();
-                }
-
-                function showQuestion() {
-                    const question = currentQuiz[currentQuestionIndex];
-                    questionTitle.textContent = question.question;
-                    optionsContainer.innerHTML = '';
-                    question.options.forEach(option => {
-                        const button = document.createElement('button');
-                        button.textContent = option;
-                        button.onclick = () => selectAnswer(button, option, question.answer);
-                        optionsContainer.appendChild(button);
-                    });
-                }
-
-                function selectAnswer(button, selected, correct) {
-                    Array.from(optionsContainer.children).forEach(btn => {
-                        btn.disabled = true;
-                        if (btn.textContent === correct) {
-                            btn.classList.add('correct');
-                        }
-                    });
-                    if (selected === correct) {
-                        score++;
-                    } else {
-                        button.classList.add('incorrect');
-                    }
-                    nextBtn.style.display = 'block';
-                }
-
-                function nextQuestion() {
-                    currentQuestionIndex++;
-                    if (currentQuestionIndex < currentQuiz.length) {
-                        showQuestion();
-                        nextBtn.style.display = 'none';
-                        Array.from(optionsContainer.children).forEach(btn => btn.disabled = false);
-                    } else {
-                        showResults();
-                    }
-                }
-                
-                function showResults() {
-                    quizContainer.style.display = 'none';
-                    quizResults.style.display = 'block';
-                    document.getElementById('quiz-score').textContent = `You scored ${score} out of ${currentQuiz.length}!`;
-                }
-
-                startBtn.addEventListener('click', startQuiz);
-                nextBtn.addEventListener('click', nextQuestion);
-                restartBtn.addEventListener('click', () => {
-                     quizSetup.style.display = 'block';
-                     quizResults.style.display = 'none';
-                });
-            }
-
-            // ============================
-            // Settings Module
-            // ============================
-            function initSettingsModule() {
-                const apiKeyInput = document.getElementById('api-key-input');
-                const saveKeyBtn = document.getElementById('save-api-key-btn');
-                const exportBtn = document.getElementById('export-data-btn');
-                const clearBtn = document.getElementById('clear-data-btn');
-
-                apiKeyInput.value = state.settings.apiKey || '';
-
-                saveKeyBtn.addEventListener('click', () => {
-                    state.settings.apiKey = apiKeyInput.value.trim();
-                    saveState();
-                    alert('API Key saved!');
-                });
-
-                exportBtn.addEventListener('click', () => {
-                    const dataStr = JSON.stringify(state, null, 2);
-                    const blob = new Blob([dataStr], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = '7k-life-backup.json';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                });
-                
-                clearBtn.addEventListener('click', () => {
-                    if (confirm('DANGER! This will delete ALL your data. Are you absolutely sure?')) {
-                        localStorage.removeItem('7kLifeState');
-                        window.location.reload();
-                    }
+                    li.innerHTML = `
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''}>
+                        <label>${todo.text}</label>
+                        <span class="priority-badge ${priorityClass}">${todo.priority}</span>
+                        <span class="task-date">${formattedDate}</span>
+                        <button class="delete-task-btn">×</button>
+                    `;
+                    todoList.appendChild(li);
                 });
             }
             
-            // ============================
-            // AI Module
-            // ============================
-            function initAIModule() {
-                const sendBtn = document.getElementById('ai-send-btn');
-                const input = document.getElementById('ai-input');
-                const chatWindow = document.getElementById('ai-chat-window');
-                
-                async function queryAI(promptText) {
-                    if (!state.settings.apiKey) {
-                        return "API Key not set. Please add it in Settings.";
-                    }
-                    
-                    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${state.settings.apiKey}`;
-                    
-                    try {
-                        const response = await fetch(API_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [{ text: promptText }]
-                                }]
-                            })
-                        });
-                        if (!response.ok) {
-                             const errorBody = await response.json();
-                             console.error("API Error:", errorBody);
-                             return `Error: ${errorBody.error.message}`;
-                        }
-                        const data = await response.json();
-                        return data.candidates[0].content.parts[0].text;
-                    } catch (error) {
-                        console.error("Fetch Error:", error);
-                        return "Sorry, I couldn't connect to the AI service.";
-                    }
+            function renderJournalHistory() {
+                historyContent.innerHTML = '';
+                if (state.journal.length === 0) {
+                    historyContent.innerHTML = '<p>No journal entries yet.</p>';
+                    return;
                 }
                 
-                function addMessage(text, sender) {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `chat-message ${sender}-message`;
-                    messageDiv.textContent = text;
-                    chatWindow.appendChild(messageDiv);
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
-                }
-                
-                async function handleAISubmit() {
-                    const prompt = input.value.trim();
-                    if (!prompt) return;
+                state.journal.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'history-entry';
                     
-                    addMessage(prompt, 'user');
-                    input.value = '';
-                    input.disabled = true;
-
-                    addMessage("Thinking...", 'ai');
-                    const aiResponse = await queryAI(prompt);
+                    const tagsHTML = entry.tags.map(tag => `<span class="history-tag">${tag}</span>`).join('');
                     
-                    // Remove "Thinking..." message
-                    chatWindow.removeChild(chatWindow.lastChild);
-                    addMessage(aiResponse, 'ai');
-                    input.disabled = false;
-                    input.focus();
-                }
-
-                sendBtn.addEventListener('click', handleAISubmit);
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleAISubmit();
+                    entryDiv.innerHTML = `
+                        <div class="history-meta">
+                            <span>📅 ${new Date(entry.date).toLocaleString()}</span>
+                            ${entry.mood ? `<span>😊 ${entry.mood}</span>` : ''}
+                        </div>
+                        <p>${entry.text}</p>
+                        <div class="history-tags">${tagsHTML}</div>
+                    `;
+                    historyContent.appendChild(entryDiv);
                 });
             }
+            
+            function renderAdvancedNote() {
+                advancedNotesInput.value = state.advancedNote.text;
+                if (state.advancedNote.lastSaved) {
+                    notesLastSaved.textContent = `Last saved: ${new Date(state.advancedNote.lastSaved).toLocaleString()}`;
+                } else {
+                    notesLastSaved.textContent = 'Not saved yet.';
+                }
+            }
 
-            // Run application
+            // --- EVENT HANDLERS ---
+            function handleHabitControls(e) {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const { habit, action } = button.dataset;
+                if (!habit || !action) return;
+
+                if (habit === 'streak') {
+                    if (action === 'increase') state.habits.streak.value++;
+                    if (action === 'decrease' && state.habits.streak.value > 0) state.habits.streak.value--;
+                }
+                
+                saveState();
+                renderHabits();
+            }
+            
+            function handleWorkoutToggle(e) {
+                state.habits.workout.value = e.target.checked;
+                saveState();
+            }
+            
+            function handleSleepInput(e) {
+                state.habits.sleep.value = parseFloat(e.target.value);
+                saveState();
+            }
+            
+            function handleHabitNameChange(e) {
+                const { habit } = e.target.dataset;
+                state.habits[habit].name = e.target.value;
+                saveState();
+            }
+            
+            function handleAddTask() {
+                const text = taskInput.value.trim();
+                if (text === '') return;
+                
+                state.todos.unshift({
+                    id: Date.now(),
+                    text: text,
+                    priority: taskPriority.value,
+                    date: taskDate.value,
+                    completed: false
+                });
+                
+                taskInput.value = '';
+                saveState();
+                renderTodos();
+            }
+            
+            function handleTodoListClick(e) {
+                const li = e.target.closest('.todo-item');
+                if (!li) return;
+                
+                const todoId = parseInt(li.dataset.id, 10);
+                const todo = state.todos.find(t => t.id === todoId);
+                
+                if (e.target.type === 'checkbox') {
+                    todo.completed = e.target.checked;
+                } else if (e.target.classList.contains('delete-task-btn')) {
+                    state.todos = state.todos.filter(t => t.id !== todoId);
+                }
+                
+                saveState();
+                renderTodos();
+            }
+            
+            function handleSaveJournal() {
+                const text = journalInput.value.trim();
+                if (text === '') return;
+                
+                const tags = journalTags.value.split(',').map(tag => tag.trim()).filter(Boolean);
+                
+                state.journal.unshift({
+                    text,
+                    mood: journalMood.value.trim(),
+                    tags,
+                    date: new Date().toISOString()
+                });
+                
+                journalInput.value = '';
+                journalMood.value = '';
+                journalTags.value = '';
+                
+                saveState();
+            }
+            
+            function handleSaveNote() {
+                state.advancedNote.text = advancedNotesInput.value;
+                state.advancedNote.lastSaved = new Date().toISOString();
+                saveState();
+                renderAdvancedNote();
+            }
+            
+            // --- PANEL & MODAL LOGIC ---
+            function openPanel(panel) {
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePanel(panel) {
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            function openModal(modal) {
+                modal.classList.add('active');
+            }
+            
+            function closeModal(modal) {
+                modal.classList.remove('active');
+            }
+
+            // --- SWIPE GESTURES ---
+            let touchstartX = 0;
+            let touchstartY = 0;
+            document.body.addEventListener('touchstart', e => {
+                touchstartX = e.changedTouches[0].screenX;
+                touchstartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            document.body.addEventListener('touchend', e => {
+                const touchendX = e.changedTouches[0].screenX;
+                const touchendY = e.changedTouches[0].screenY;
+                const diffX = touchendX - touchstartX;
+                const diffY = Math.abs(touchendY - touchstartY);
+
+                // Check for horizontal swipe and ensure it's not mostly vertical
+                if (Math.abs(diffX) > 100 && diffY < 50) {
+                    if (diffX > 0) { // Swipe Right
+                         openPanel(historyPanel);
+                         renderJournalHistory();
+                    } else { // Swipe Left
+                        openPanel(notesPanel);
+                        renderAdvancedNote();
+                    }
+                }
+            });
+
+            // --- EVENT LISTENERS ---
+            habitContainer.addEventListener('click', handleHabitControls);
+            addTaskBtn.addEventListener('click', handleAddTask);
+            todoList.addEventListener('click', handleTodoListClick);
+            saveJournalBtn.addEventListener('click', handleSaveJournal);
+            saveNoteBtn.addEventListener('click', handleSaveNote);
+            
+            viewHistoryBtn.addEventListener('click', () => {
+                renderJournalHistory();
+                openPanel(historyPanel);
+            });
+            
+            notesFab.addEventListener('click', () => {
+                renderAdvancedNote();
+                openPanel(notesPanel);
+            });
+
+            studyModeBtn.addEventListener('click', () => openPanel(studyPanel));
+            aiFab.addEventListener('click', () => openModal(aiModal));
+
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetId = e.target.dataset.target;
+                    const element = document.getElementById(targetId);
+                    if(element.classList.contains('panel')) closePanel(element);
+                    if(element.classList.contains('modal')) closeModal(element);
+                });
+            });
+            
+            overlay.addEventListener('click', () => {
+                document.querySelectorAll('.panel.active').forEach(closePanel);
+            });
+
+
+            // --- INITIALIZATION ---
+            function init() {
+                loadState();
+                renderHabits();
+                renderTodos();
+                // Set today's date for task input
+                taskDate.valueAsDate = new Date();
+            }
+
             init();
         });
     </script>
 </body>
 </html>
+
+
